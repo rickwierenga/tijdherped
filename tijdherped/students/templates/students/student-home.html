@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Sessions</h2>
+<table class="table">
+<thead>
+    <th scope="col">Week Number</th>
+    <th scope="col">Date</th>
+    <th scope="col">Check in time</th>
+    <th scope="col">Check out time</th>
+    <th scope="col">Duration (minutes)</th>
+    <th scope="col">Lessons</th>
+</thead>
+{% for session in student.sessions %}
+<tr>
+    <td>{{ session.week_number }}</td>
+    <td>{{ session.date }}</td>
+    <td>{{ session.start_time }}</td>
+    <td>{{ session.end_time }}</td>
+    <td>{{ session.duration }}</td>
+    <td>{{ session.duration_lesson }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock content %}

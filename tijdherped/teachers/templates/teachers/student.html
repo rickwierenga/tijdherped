@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/student.css') }}">
+{% endblock head %}
+
+{% block content %}
+
+<div id="student" class="container">
+  <div class="row">
+    <div class="col-md-8 main">
+      <h1>{{ student.first_name }} {{ student.last_name }}</h1>
+      <h2>{{ student.first_name }} has worked {{ student.worked_duration }} hours this project.</h2>
+      <a href="mailto:{{ student.email }}">{{ student.email }}</a><br>
+
+      <div class="check-btns">
+        <a href="{{ url_for('teachers.checkin', id=student.id) }}" class="btn btn-outline-thp {% if student.check_in_time %}disabled{% endif %}">Checkin</a>
+        <a href="{{ url_for('teachers.checkout', id=student.id) }}" class="btn btn-outline-thp {% if not student.check_in_time %}disabled{% endif %}">Checkout</a>
+      </div>
+
+      <div class="row progress-container">
+        <div class="col">
+            <div class="progress">
+              <div class="progress-bar {{ student.progress.sufficient }}" role="progressbar" style="width: {{ student.progress.progress }}%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        <div class="col-2 align-self-end">
+            <p class="progress-percentage">{{ student.progress.progress }}%</p>
+        </div>
+      </div>
+
+      <div class="sessions">
+        <h2>{{ student.first_name }}'s sessions</h2>
+
+        <table class="table">
+        <thead>
+            <th scope="col">Week Number</th>
+            <th scope="col">Date</th>
+            <th scope="col">Check in time</th>
+            <th scope="col">Check out time</th>
+            <th scope="col">Duration (minutes)</th>
+        </thead>
+        {% for session in student.sessions|reverse %}
+        <tr>
+            <td>{{ session.week_number }}</td>
+            <td>{{ session.date }}</td>
+            <td>{{ session.start_time }}</td>
+            <td>{{ session.end_time }}</td>
+            <td>{{ session.duration }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+      </div>
+    </div>
+
+    <div class="col-md-4 information">
+      <div class="block-container group-block-container">
+        <h2>Add Session</h2>
+        <div class="block group-block">
+          <form action="{{ url_for('teachers.add_session', id=student.id) }}" method="POST">
+            {{ new_session_form.hidden_tag() }}
+            <div class="form-group">
+              <p>Minutes</p>
+              {% if new_session_form.minutes.errors %}
+                {{ new_session_form.minutes(class="from-control form-control-lg is-invalid", placeholder=rfid_form.rfid.label.text) }}
+                <div class="invalid-feedback">
+                  {% for error in new_session_form.minutes.errors %}
+                    <span>{{ error }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                {{ new_session_form.minutes(class="form-control form-control-lg") }}
+              {% endif %}
+            </div>
+            <input type="submit" class="btn btn-small btn-primary" value="Save">
+          </form>
+        </div>
+      </div>
+
+      <div class="block-container">
+        <h2>Team</h2>
+        <div class="block team-block">
+          <p>{{ student.first_name }} is in team {{ student.team.name }}</p>
+          <div>
+            <form action="{{ url_for('teachers.update_team', id=student.id) }}" method="POST">
+                <select name="team">
+                    <option value="{{ student.team.id }}">{{ student.team.name }} (current)</option>
+                    <option value="">None</option>
+                    {% for team in student.group.teams %}
+                    <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" class="btn btn-primary" value="Save">
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="block-container group-block-container">
+        <h2>Group</h2>
+        <div class="block group-block">
+          <p>{{ student.first_name }} is in group {{ student.group.name }}</p>
+          <div>
+            <form action="{{ url_for('teachers.update_group', id=student.id) }}" method="POST">
+                <select name="group">
+                    <option value="{{ student.group.id }}">{{ student.group.name }} (current)</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" class="btn btn-primary" value="Save">
+            </form>
+          </div>
+        </div>
+      </div>
+
+        <div class="block-container group-block-container">
+          <h2>RFID Card</h2>
+          <div class="block group-block">
+            <p>{{ student.first_name }}'s card identifier is <span id="rfid">{{ student.rfid }}</span></p>
+            <p>The input is case sensitive.</p>
+            <div>
+              <form action="{{ url_for('teachers.rfid', id=student.id) }}" method="POST">
+                {{ rfid_form.hidden_tag() }}
+                <div class="form-group">
+                    {% if rfid_form.rfid.errors %}
+                        {{ rfid_form.rfid(class="from-control form-control-lg is-invalid code", placeholder=rfid_form.rfid.label.text) }}
+                        <div class="invalid-feedback">
+                            {% for error in rfid_form.rfid.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ rfid_form.rfid(class="form-control form-control-lg code", placeholder=rfid_form.rfid.label.text) }}
+                    {% endif %}
+                  </div>
+                  <input type="submit" class="btn btn-primary" value="Save"><button class="btn btn-sm btn-outline-danger" id="lost-card-btn" onclick="lostCard();">Lost Card</button><span id="delete-result"></span>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+  function lostCard() {
+    $.ajax({
+      url: window.location.href+'/rfid/',
+      type: 'DELETE',
+      success: function(result) {
+        console.log(result, result=='OK');
+        if (result == 'OK') {
+          $('#rfid').text('None');
+        }
+        $('#delete-result').text(result);
+      }
+    });
+  }
+</script>
+{% endblock scripts %}

@@ -1,0 +1,312 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/teacher.css') }}">
+<script src="{{ url_for('static', filename='scripts/teacher.js') }}"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-2">
+        <div class="nav flex-column nav-pills" aria-orientation="vertical">
+          <a class="nav-link active" data-toggle="pill" href="#v-pills-home" role="tab">Home</a>
+          <hr>
+          <h4>Groups</h4>
+          {% for group in groups %}
+          <a class="nav-link" data-toggle="pill" href="#v-pills-{{group.id}}">{{ group.name }}</a>
+          {% endfor %}
+          <a class="nav-link" data-toggle="pill" href="#v-pills-add-group" role="tab">Add Group</a>
+          <hr>
+        </div>
+      </div>
+      <div class="col-8">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel">
+                <div id="working">
+                    <h1>Working now</h1>
+                    {% if working|length >=1 %}
+                    <table class="table">
+                        <thead>
+                            <th scope="col">Name</th>
+                            <th scope="col">Check in time</th>
+                        </thead>
+                        {% for student in working %}
+                        <tr>
+                            <td><a href="{{ url_for('teachers.student', id=student.id) }}">{{ student.first_name }} {{ student.last_name }}</a></td>
+                            <td><p>{{ student.check_in_time.strftime('%H:%M:%S') }}</p></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    {% else %}
+                    <p>No one is currently working.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% for group in groups %}
+            <div class="tab-pane fade" id="v-pills-{{group.id}}" role="tabpanel">
+                <h1 class="group-title">{{ group.name }}</h1>
+                <div class="group">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#project-{{ group.id }}" data-toggle="tab" role="tab">Project ({{ group.current_project.progress }}%)</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#teams-{{ group.id }}" data-toggle="tab" role="tab">Teams ({{group.teams|length}})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#students-{{ group.id }}" data-toggle="tab" role="tab">Students ({{group.students|length}})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#add-student-{{ group.id }}" data-toggle="tab" role="tab">+ Add Student</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#add-team-{{ group.id }}" data-toggle="tab" role="tab">+ Add Team</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#add-project-{{ group.id }}" data-toggle="tab" role="tab">+ Add Project</a>
+                        </li>
+                    </ul>
+                    </ul>
+                    <div class="tab-content" id="group-info-content">
+                        <div class="tab-pane fade show active project" id="project-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">Projects</h2>
+                            <hr>
+                            {% if group.current_project %}
+                            <h4>{{ group.current_project.name }}</h4>
+                            <p>Total progress of this project. This project started in week {{group.current_project.start_week}} and ends in week {{group.current_project.end_week}}. Students have to do {{group.current_project.net_duration}} sessions.</p>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ group.current_project.progress }}%">{{ group.current_project.progress }}%</div>
+                            </div>
+                            {% else %}
+                            this group is not working on a project
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="teams-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">Teams</h2>
+                            <hr>
+                            {% if group.teams|length >= 1 %}
+                            {% for team in group.teams %}
+                                <div class="team">
+                                   <p>{{ team.name }}</p>
+                               </div>
+                            {% endfor %}
+                            {% else %}
+                            this group does not have any teams
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="students-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">Students</h2>
+                            <hr>
+                            {% if group.students|length >= 1 %}
+                            <table class="table">
+                                <thead>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Team</th>
+                                    <th scope="col">Progress</th>
+                                </thead>
+                                {% for student in group.students %}
+                                <tr>
+                                    <td style="width: 20%;"><a href="{{ url_for('teachers.student', id=student.id) }}" class="name">{{ student.first_name }} {{ student.last_name }}</a></td>
+                                    <td style="width: 20%;">{{ student.team.name }}</td>
+                                    <td style="width: 60%;">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {{ student.progress.sufficient }}" role="progressbar" style="width: {{ student.progress.progress }}%">{{ student.progress.progress }}%</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                there are no students in this group
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="add-student-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">New Student</h2>
+                            <hr>
+                            <form method="POST" action="{{ url_for('teachers.new_student') }}" enctype="multipart/form-data">
+                                {{ new_student_form.hidden_tag() }}
+                                <fieldset class="form-group">
+                                    <div class="form-group">
+                                        {{ new_student_form.first_name.label(class="form-control-label") }}
+                                        {% if new_student_form.first_name.errors %}
+                                            {{ new_student_form.first_name(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_student_form.first_name.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ new_student_form.first_name(class="form-control form-control-lg") }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        {{ new_student_form.last_name.label(class="form-control-label") }}
+                                        {% if new_student_form.last_name.errors %}
+                                            {{ new_student_form.last_name(class="frm-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_student_form.last_name.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ new_student_form.last_name(class="form-control form-control-lg") }}
+                                        {% endif %}
+                                    </div>
+
+                                    <input type="hidden" name="group_id" value="{{ group.id }}">
+                                </fieldset>
+                                <div class="form-group">
+                                    {{ new_student_form.submit(class="btn btn-outline-primary") }}
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="add-team-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">New Team</h2>
+                            <hr>
+                            <form method="POST" action="{{ url_for('teachers.new_team') }}" enctype="multipart/form-data">
+                                {{ new_team_form.hidden_tag() }}
+                                <fieldset class="form-group">
+                                    <div class="form-group">
+                                        {{ new_team_form.name.label(class="form-control-label") }}
+                                        {% if new_team_form.name.errors %}
+                                            {{ new_team_form.name(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_team_form.name.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ new_team_form.name(class="form-control form-control-lg") }}
+                                        {% endif %}
+                                    </div>
+                                    <input type="hidden" name="group_id" value="{{ group.id }}">
+                                </fieldset>
+                                <div class="form-group">
+                                    {{ new_team_form.submit(class="btn btn-outline-primary") }}
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="add-project-{{ group.id }}" role="tabpanel">
+                            <h2 class="pane-title">New Project</h2>
+                            <hr>
+                            <form method="POST" action="{{ url_for('teachers.new_project', group_id=group.id) }}" enctype="multipart/form-data">
+                                {{ new_project_form.hidden_tag() }}
+                                <fieldset class="form-group">
+                                    <p class="text-muted">Creating a new project will archive the current project.</p>
+                                    <div class="form-group">
+                                        {{ new_project_form.name.label(class="form-control-label") }}
+                                        {% if new_project_form.name.errors %}
+                                        {{ new_project_form.name(class="form-control form-control-lg is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in new_project_form.name.errors %}
+                                            <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        {{ new_project_form.name(class="form-control form-control-lg") }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col">
+                                            {{ new_project_form.start_week.label(class="form-control-label") }}
+                                            {% if new_project_form.start_week.errors %}
+                                            {{ new_project_form.start_week(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_project_form.start_week.errors %}
+                                                <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            {{ new_project_form.start_week(class="form-control form-control-lg") }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group col">
+                                            {{ new_project_form.end_week.label(class="form-control-label") }}
+                                            {% if new_project_form.end_week.errors %}
+                                            {{ new_project_form.end_week(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_project_form.end_week.errors %}
+                                                <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            {{ new_project_form.end_week(class="form-control form-control-lg") }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group col">
+                                            {{ new_project_form.excluded.label(class="form-control-label") }}
+                                            {% if new_project_form.excluded.errors %}
+                                            {{ new_project_form.excluded(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in new_project_form.excluded.errors %}
+                                                <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            {{ new_project_form.excluded(class="form-control form-control-lg") }}
+                                            {% endif %}
+                                        </div>
+                                        <input type="hidden" name="group_id" value="{{ group.id }}">
+                                    </div>
+                                </fieldset>
+                                <div class="form-group">
+                                    {{ new_project_form.submit(class="btn btn-outline-primary") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="tab-pane fade" id="v-pills-add-group" role="tabpanel">
+                <h1>Add Group</h1>
+                <p>You can create groups by uploading MS Excel files. Column A should contain the first names of the students, B the last name.</p>
+                <form method="POST" action="{{ url_for('teachers.new_group') }}" enctype="multipart/form-data">
+                {{ new_group_form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        {{ new_group_form.name.label(class="form-control-label") }}
+                        {% if new_group_form.name.errors %}
+                            {{ new_group_form.name(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in new_group_form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ new_group_form.name(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ new_group_form.excel_file.label(class="form-control-label") }}
+                        {% if new_group_form.excel_file.errors %}
+                            {{ new_group_form.excel_file(class="frm-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in new_group_form.excel_file.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ new_group_form.excel_file(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    </fieldset>
+                    <div class="form-group">
+                        {{ new_group_form.submit(class="btn btn-outline-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+{% endblock scripts %}
+
+{% endblock content %}

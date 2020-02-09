@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,500,600&display=swap');
+
+* {
+    font-family: 'Nunito', sans-serif;
+    color: #292f36;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#root {
+    display: none;
+    min-height: 100%;
+}
+
+h1, h2 {
+    font-weight: 600;
+}
+
+nav {
+    background-color: #007bff;
+    margin-bottom: 50px;
+    height: 80px;
+}
+
+.btn.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-outline-thp {
+    border: 1px solid #bed1ed;
+    color: #292f36;
+    padding: 8px 5px;
+    color: #007bff;
+}
+
+.btn-outline-thp:hover {
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-thp.disabled {
+    color: #292f36;
+    opacity: 0.4;
+}
+
+input[type="text"], input[type="password"] {
+    background-color: #eef3fb;
+    border: 0;
+    padding: 10px 5px;
+    width: 100%;
+    border-radius: 5px;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    background-color: #eef3fb;
+}
+
+.block-container {
+    margin: 10px;
+}
+
+.block-container h2 {
+    font-size: 25px;
+}
+
+.block {
+    border: 1px solid #bed1ed;
+    border-radius: 8px;
+    padding: 25px;
+}
+
+footer {
+    text-align: center;
+    color: #afafaf;
+    margin-top: -50px;
+    height: 50px;
+}

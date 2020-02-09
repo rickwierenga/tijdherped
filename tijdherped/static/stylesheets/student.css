@@ -1,0 +1,51 @@
+/* main */
+.main, .information {
+    padding: 25px;
+}
+
+.main h2 {
+    color: #8f99a7;
+    font-weight: 400;
+    font-size: 20px;
+}
+
+/* progress */
+.progress-container {
+    margin-top: 30px;
+}
+
+/* sessions */
+.sessions {
+    margin-top: 30px;
+}
+
+.sessions h1 {
+    font-weight: 700;
+}
+
+.sessions h2 {
+    font-weight: 500;
+    color: #292f36;
+    font-size: 22px;
+}
+
+p.progress-percentage {
+    text-align: right;
+}
+
+.code {
+    font-family: monospace;
+}
+
+#lost-card-btn {
+    margin-left: 8px;
+}
+
+/* information */
+.information h1 {
+    font-weight: 500;   
+}
+
+.group-block-container {
+    margin-top: 25px;
+}

@@ -1,0 +1,7 @@
+env/
+codes.sh
+tijdherped/__pycache__
+__pycache__
+tijdherped/tijdherped.db
+*.swp
+/.vscode

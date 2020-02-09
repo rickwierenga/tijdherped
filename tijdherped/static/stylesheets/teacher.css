@@ -1,0 +1,50 @@
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #bed1ed;
+    width: 100%;
+}
+
+h2.pane-title {
+    font-weight: 400;
+    font-size: 22px;
+}
+
+.group {
+    margin-bottom: 30px;
+}
+
+.group .group-title {
+    font-weight: 400;
+    font-size: 24px;
+    color: #292f36;
+}
+
+.group ul.nav {
+    margin-bottom: 10px;
+}
+
+.group hr {
+    margin: 0 0 8px 0;
+}
+
+.group h4 {
+    font-size: 18px;
+}
+
+.group .student {
+    display: flex;
+}
+
+.group .student .name {
+    width: 200px;
+}
+
+.group .student .progress {
+    float: right;
+    width: 100%;
+}
+
+.project h4 {
+    font-weight: 600;
+}
