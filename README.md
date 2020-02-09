@@ -10,6 +10,18 @@ source env/bin/activate
 pip3 -r install requirements.txt
 ```
 
+tested on a raspberry pi 3b
+
+## Demo
+
+Video: https://youtu.be/tFdpWRlZjxw.
+
+![](.github/1.png)
+![](.github/2.png)
+![](.github/3.png)
+![](.github/4.png)
+![](.github/5.png)
+
 ## API Docs
 ### Checkin
 `POST /api/v1/student/checkin`
